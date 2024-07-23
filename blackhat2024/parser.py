@@ -3,6 +3,8 @@ from html.parser import HTMLParser
 prefix="https://www.blackhat.com/us-24/briefings/schedule/index.html"
 
 positions=[]
+days=[]
+times=[]
 
 class Session:
     def __init__(self):
@@ -30,6 +32,10 @@ class Session:
         day = day.replace("Thursday", "8/8")
         self.day = day
         self.time = time
+        if not self.day in days:
+            days.append(self.day)
+        if not self.time in times:
+            times.append(self.time)
     def setURL(self, url):
         #print(url)
         global prefix
@@ -105,3 +111,20 @@ with open("raw.html", "r") as f:
         for s in parser.sessions:
             f2.write(s.day+","+s.time+",\""+s.pos+"\",\"=HYPERLINK(\"\""+s.url+"\"\",\"\""+s.title+"\"\")\"\n")
             i=i+1
+    with open("table.csv", "w") as f3:
+        f3.write(",")
+        for pos in positions:
+            f3.write(",\""+pos+"\"")
+        f3.write("\n")
+        for day in days:
+            for time in times:
+                f3.write(day+","+time)
+                for pos in positions:
+                    found=False
+                    for s in parser.sessions:
+                        if s.day == day and s.time == time and s.pos == pos:
+                            found=True
+                            f3.write(",\"=HYPERLINK(\"\""+s.url+"\"\",\"\""+s.title+"\"\")\"")
+                    if not found:
+                        f3.write(",")
+                f3.write("\n")
